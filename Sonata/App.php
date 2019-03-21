@@ -2,7 +2,10 @@
 
 namespace Sonata;
 
+
 use Sonata\Http\Request;
+use Sonata\Http\Response;
+use Sonata\Mvc\View;
 
 class App
 {
@@ -10,7 +13,28 @@ class App
 
     private $request = null;
 
-    public function getRequest(): Request
+    private $response = null;
+
+    private $view = null;
+
+    public static function getInstance()
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
+     *  Преобразует имя в camelCase
+     */
+    public function getCanonicalName($name)
+    {
+        $nameParts = explode('-', $name);
+        return implode('', array_map(function ($v) {return ucfirst(strtolower($v));}, $nameParts));
+    }
+
+    public function getRequest()
     {
         if ($this->request === null) {
             $this->request = new Request();
@@ -18,35 +42,39 @@ class App
         return $this->request;
     }
 
-    /**
-     *  Преобразует имя в camelCase
-     */
-    public function getCanonicalName($name): string
+    public function getResponse()
     {
-        $nameParts = explode('-', $name);
-        return implode('', array_map(function ($v) {return ucfirst(strtolower($v));}, $nameParts));
+        if ($this->response === null) {
+            $this->response = new Response();
+        }
+        return $this->response;
     }
 
+    public function getView()
+    {
+        if ($this->view === null) {
+            $this->view = new View();
+        }
+        return $this->view;
+    }
 
     public function run()
     {
-        $controllerClass = '\\controllers\\' . $this->getCanonicalName($this->getRequest()->getController()) . 'Controller';
-        $actionName = 'action' . $this->getCanonicalName($this->getRequest()->getAction());
-        $controller = new $controllerClass();
-        $controllerClass->{$actionName}();
-    }
+        $module = $this->getRequest()->getModule();
+        $controller = $this->getRequest()->getController();
+        $action = $this->getRequest()->getAction();
 
+        $controllerClassName = ($module === 'default' ? '\\controllers\\' : '\\' . $module . '\\controllers\\') . $this->getCanonicalName($controller) . 'Controller';
+        $actionName = 'action' . $this->getCanonicalName($action);
+
+        $controllerClass = new $controllerClassName();
+        $controllerClass->{$actionName}();
+
+        echo $controllerClassName;
+    }
 
     private function __construct()
     {
-    }
-
-    public static function getInstance(): self
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
     }
 
 }
