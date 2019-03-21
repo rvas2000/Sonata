@@ -60,6 +60,8 @@ class App
 
     public function run()
     {
+        session_start();
+        ob_start();
         $module = $this->getRequest()->getModule();
         $controller = $this->getRequest()->getController();
         $action = $this->getRequest()->getAction();
@@ -68,9 +70,12 @@ class App
         $actionName = 'action' . $this->getCanonicalName($action);
 
         $controllerClass = new $controllerClassName();
-        $controllerClass->{$actionName}();
+        $controllerClass->init();
 
-        echo $controllerClassName;
+        $this->getResponse()->setContent($controllerClass->{$actionName}());
+        $this->getResponse()->flush();
+
+        ob_end_flush();
     }
 
     private function __construct()

@@ -14,11 +14,11 @@ class View
 
     public function render($template, $data = [])
     {
-
+        return '';
     }
 
     public function renderPartial($template, $data = [])
     {
-
+        return '';
     }
 }

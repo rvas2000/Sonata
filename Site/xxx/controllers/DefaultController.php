@@ -6,10 +6,22 @@
  * Time: 13:55
  */
 
-namespace controllers;
+namespace xxx\controllers;
+
+use Sonata\Http\Response;
+use Sonata\Mvc\ControllerAbstract;
 
 
-class DefaultController
+class DefaultController extends ControllerAbstract
 {
+    public function init()
+    {
+        parent::init();
+        $this->getResponse()->setType(Response::TYPE_TEXT);
+    }
 
+    public function actionIndex()
+    {
+        echo 'aaaaa';
+    }
 }
