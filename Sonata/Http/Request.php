@@ -12,21 +12,13 @@ namespace Sonata\Http;
 class Request
 {
 
-    protected $module = null;
-
     protected $controller = null;
 
     protected $action = null;
 
     protected $parameters = null;
 
-    public function getModule()
-    {
-        if ($this->module === null) {
-            $this->parseUri();
-        }
-        return $this->module;
-    }
+    protected $rootPath = null;
 
     public function getController()
     {
@@ -44,6 +36,13 @@ class Request
         return $this->action;
     }
 
+    public function getRootPath()
+    {
+        if ($this->rootPath === null) {
+            $this->parseUri();
+        }
+        return $this->rootPath;
+    }
 
     public function getParameter($name, $defaultValue = null)
     {
@@ -67,6 +66,14 @@ class Request
             explode('/', $_SERVER['SCRIPT_NAME'])
         );
 
+        $this->rootPath = '/' . implode('/', array_filter(
+            array_intersect(
+                explode('/', $_SERVER['REQUEST_URI']),
+                explode('/', $_SERVER['SCRIPT_NAME'])
+            ),
+            function ($v) { return ! (empty($v) || preg_match('/\\.php$/', $v));}
+        ));
+
         // Разбиваем строку запроса на элементы
         $uriElements = array_filter(
 
@@ -86,39 +93,19 @@ class Request
 
         $uriElements = array_reverse($uriElements);
 
-        $this->module = 'default';
         $this->controller = 'default';
         $this->action = 'index';
-        $hasModule = false;
 
         if (count($uriElements)) {
 
-            // Первый элемент - модуль или контроллер?
+            // Первый элемент - контроллер
             if (($element = array_pop($uriElements)) !== null) {
-                if (realpath(BASE_PATH . '/Site/' . $element)) {
-                    $this->module = $element;
-                    $hasModule = true;
-                } else {
-                    $this->controller = $element;
-                }
+                $this->controller = $element;
             }
 
-            // Второй элемент - контроллер или действие?
+            // Второй элемент - действие
             if (($element = array_pop($uriElements)) !== null) {
-                if ($hasModule) {
-                    $this->controller = $element;
-                } else {
-                    $this->action = $element;
-                }
-            }
-
-            // третий элемент - действие или часть списка параметров?
-            if (($element = array_pop($uriElements)) !== null) {
-                if ($hasModule) {
-                    $this->action = $element;
-                } else {
-                    array_push($uriElements, $element);
-                }
+                $this->action = $element;
             }
 
             // Оставшиеся элементы переносим в GET-параметры

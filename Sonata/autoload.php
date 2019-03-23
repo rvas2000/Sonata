@@ -10,9 +10,7 @@ spl_autoload_register(function ($className) {
         if ($elements[0] == 'Sonata') {
             $path = realpath(SONATA_PATH . '/' . implode('/', $elements) . '.php');
         } else {
-            $path = realpath(BASE_PATH . '/Site/default/' . implode('/', $elements) . '.php');
-            if ($path === false ) { $path = realpath(BASE_PATH . '/Site/' . implode('/', $elements) . '.php');
-            }
+            $path = realpath(BASE_PATH . '/Site/' . implode('/', $elements) . '.php');
         }
     }
 

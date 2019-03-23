@@ -33,15 +33,21 @@ abstract class ControllerAbstract
         return $this->getApp()->getView();
     }
 
-    public function render($template, $data = [])
+    public function render($data = [], $template = null)
     {
-        return $this->getView()->render($template, $data);
+        return $this->getView()->render($data, $template);
     }
 
-    public function renderPartial($template, $data = [])
+    public function renderPartial($data = [], $template)
     {
-        return $this->getView()->renderPartial($template, $data);
+        return $this->getView()->renderPartial($data, $template);
     }
+
+    public function getService($name)
+    {
+        return $this->getApp()->getService($name);
+    }
+
 
     public function init()
     {

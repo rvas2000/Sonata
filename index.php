@@ -1,4 +1,5 @@
 <?php
+//phpinfo();
 
 use Sonata\App;
 

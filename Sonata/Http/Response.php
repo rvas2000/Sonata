@@ -67,6 +67,11 @@ class Response
             header(sprintf("%s: %s", $header, $content), true);
         }
 
-        echo $this->getContent();
+        if ($this->type == self::TYPE_JSON) {
+            echo json_encode($this->getContent());
+        } else {
+            echo $this->getContent();
+        }
+
     }
 }

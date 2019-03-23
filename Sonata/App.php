@@ -3,6 +3,7 @@
 namespace Sonata;
 
 
+use Sonata\Common\Config;
 use Sonata\Http\Request;
 use Sonata\Http\Response;
 use Sonata\Mvc\View;
@@ -16,6 +17,22 @@ class App
     private $response = null;
 
     private $view = null;
+
+    private $config = null;
+
+    private $pdo = null;
+
+    private $services = [];
+
+    public function getService($name)
+    {
+        if (! isset($this->services[$name])) {
+            $className = '\\services\\' . $this->getCanonicalName($name) . 'Service';
+            $this->services[$name] = new $className();
+        }
+        return $this->services[$name];
+
+    }
 
     public static function getInstance()
     {
@@ -58,15 +75,45 @@ class App
         return $this->view;
     }
 
+    public function getConfig()
+    {
+        if ($this->config === null) {
+            $this->config = new Config();
+        }
+        return $this->config;
+    }
+
+    public function getPdo()
+    {
+        if ($this->pdo === null) {
+            $config = $this->getConfig()->get('db');
+            $pdo_driver = $config['pdo_driver'];
+            $host = $config['host'];
+            $port = $config['port'];
+            $dbname = $config['dbname'];
+            $user = $config['user'];
+            $password = $config['password'];
+
+
+            $dsn = "{$pdo_driver}:host={$host};port={$port};dbname={$dbname}";
+            $this->pdo = new \PDO(
+                $dsn,
+                $user,
+                $password,
+                [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC]
+            );
+        }
+        return $this->pdo;
+    }
+
     public function run()
     {
         session_start();
         ob_start();
-        $module = $this->getRequest()->getModule();
         $controller = $this->getRequest()->getController();
         $action = $this->getRequest()->getAction();
 
-        $controllerClassName = ($module === 'default' ? '\\controllers\\' : '\\' . $module . '\\controllers\\') . $this->getCanonicalName($controller) . 'Controller';
+        $controllerClassName = '\\controllers\\' . $this->getCanonicalName($controller) . 'Controller';
         $actionName = 'action' . $this->getCanonicalName($action);
 
         $controllerClass = new $controllerClassName();
