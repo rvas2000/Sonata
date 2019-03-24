@@ -11,6 +11,7 @@ namespace Sonata\Common\Db;
 
 use Sonata\App;
 use Sonata\Common\ServiceAbstract;
+use Sonata\Mvc\ModelAbstract;
 
 abstract class DbServiceAbstract extends ServiceAbstract
 {
@@ -46,7 +47,7 @@ abstract class DbServiceAbstract extends ServiceAbstract
         return sprintf($this->quoteTempl, $name);
     }
 
-    public function insert ($tableName, array $values)
+    public function insertTbl ($tableName, array $values)
     {
         $sql = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
@@ -61,7 +62,7 @@ abstract class DbServiceAbstract extends ServiceAbstract
         return $r;
     }
 
-    public function update ($tableName, array $values, array $conditions)
+    public function updateTbl ($tableName, array $values, array $conditions)
     {
         $sql = sprintf(
             "UPDATE %s SET %s WHERE %s",
@@ -78,7 +79,7 @@ abstract class DbServiceAbstract extends ServiceAbstract
         return $r;
     }
 
-    public function delete ($tableName, array $conditions)
+    public function deleteTbl ($tableName, array $conditions)
     {
         $sql = sprintf(
             "DELETE FROM %s WHERE %s",
@@ -93,7 +94,7 @@ abstract class DbServiceAbstract extends ServiceAbstract
         return $r;
     }
 
-    public function select ($tableName, array $conditions, array $orderBy = [])
+    public function selectTbl ($tableName, array $conditions, array $orderBy = [])
     {
         $sql = sprintf(
             "SELECT * FROM %s WHERE %s",
@@ -112,6 +113,12 @@ abstract class DbServiceAbstract extends ServiceAbstract
         $rs = $stmt->fetchAll();
         return $rs;
     }
+
+    public function save(ModelAbstract $model)
+    {
+
+    }
+
 
     protected function getWhereString(array $conditions)
     {
